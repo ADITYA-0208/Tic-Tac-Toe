@@ -1,8 +1,8 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -13,126 +13,106 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class TicTacToeFX extends Application {
-    private TicTacToe game = new TicTacToe();
-    private AIPlayer ai = new AIPlayer();
-    private Button[][] buttons = new Button[3][3];
-    private boolean playerTurn = true;
-    private boolean gameOver = false;
-    private Move lastMove = null;
+   private TicTacToe game = new TicTacToe();
+   private Button[][] buttons = new Button[3][3];
+   private boolean gameOver = false;
+   private char currentPlayer = 'X';
 
-    private Label statusLabel;
+   public TicTacToeFX() {
+   }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        GridPane gridPane = new GridPane();
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
+   public void start(Stage var1) throws Exception {
+      GridPane var2 = new GridPane();
+      var2.setAlignment(Pos.CENTER);
+      var2.setHgap(10.0);
+      var2.setVgap(10.0);
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                Button button = new Button();
-                button.setPrefSize(100, 100);
-                button.setFont(Font.font("Verdana", FontWeight.BOLD, 36));
-                gridPane.add(button, j, i);
-                buttons[i][j] = button;
+      for(int var3 = 0; var3 < 3; ++var3) {
+         for(int var4 = 0; var4 < 3; ++var4) {
+            Button var5 = new Button();
+            var5.setPrefSize(100.0, 100.0);
+            var5.setFont(Font.font("Verdana", FontWeight.BOLD, 36.0));
+            var2.add(var5, var4, var3);
+            this.buttons[var3][var4] = var5;
+            var5.setOnAction((var4x) -> {
+               if (!this.gameOver) {
+                  if (this.game.board[var3][var4] == ' ') {
+                     this.game.makeMove(var3, var4, this.currentPlayer);
+                     var5.setText(String.valueOf(this.currentPlayer));
+                     this.checkGameState();
+                     if (!this.gameOver) {
+                        this.currentPlayer = (char)(this.currentPlayer == 'X' ? 79 : 88);
+                     }
+                  }
 
-                final int row = i;
-                final int col = j;
-                button.setOnAction(event -> {
-                    if (gameOver) {
-                        return;
-                    }
-                    if (game.board[row][col] == ' ') {
-                        game.makeMove(row, col, 'X');
-                        lastMove = new Move(row, col);
-                        button.setText("X");
-                        checkGameState();
-                        if (!gameOver) {
-                            playerTurn = false;
-                            ai.makeMove(game, 'O');
-                            lastMove = lastMove;
-                            buttons[lastMove.row][lastMove.col].setText("O");
-                            checkGameState();
-                            playerTurn = true;
-                        }
-                    }
-                });
-            }
-        }
+               }
+            });
+         }
+      }
 
-        StackPane root = new StackPane();
-        root.getChildren().add(gridPane);
+      StackPane var8 = new StackPane();
+      var8.getChildren().add(var2);
+      Scene var9 = new Scene(var8, 320.0, 320.0);
+      var1.setTitle("Tic-Tac-Toe");
+      var1.setScene(var9);
+      var1.show();
+   }
 
-        Text message = new Text("");
-        message.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
-        message.setFill(Color.RED);
-        root.getChildren().add(message);
-        StackPane.setAlignment(message, Pos.BOTTOM_CENTER);
+   private void checkGameState() {
+      if (this.game.isGameOver()) {
+         this.gameOver = true;
+         if (this.game.hasWon('X')) {
+            this.showWinningLine(this.getWinningLine());
+            this.showMessage("Player X wins!");
+         } else if (this.game.hasWon('O')) {
+            this.showWinningLine(this.getWinningLine());
+            this.showMessage("Player O wins!");
+         } else {
+            this.showMessage("It's a tie!");
+         }
+      }
 
-        Scene scene = new Scene(root, 320, 320);
+   }
 
-        primaryStage.setTitle("Tic-Tac-Toe");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+   private void showMessage(String var1) {
+      Text var2 = new Text(var1);
+      var2.setFont(Font.font("Verdana", FontWeight.BOLD, 24.0));
+      var2.setFill(Color.RED);
+      StackPane var3 = (StackPane)this.buttons[0][0].getParent().getParent();
+      var3.getChildren().add(var2);
+      StackPane.setAlignment(var2, Pos.BOTTOM_CENTER);
+   }
 
-    private void checkGameState() {
-        if (game.isGameOver()) {
-            gameOver = true;
-            if (game.hasWon('X')) {
-                showWinningLine(getWinningLine());
-                showMessage("You win!");
-            } else if (game.hasWon('O')) {
-                showWinningLine(getWinningLine());
-                showMessage("The computer wins!");
-            } else {
-                showMessage("It's a tie!");
-            }
-        }
-    }
+   private void showWinningLine(Line var1) {
+      if (var1 != null) {
+         StackPane var2 = (StackPane)this.buttons[0][0].getParent().getParent();
+         Line var3 = new Line(var1.getStartX(), var1.getStartY(), var1.getEndX(), var1.getEndY());
+         var3.setStrokeWidth(5.0);
+         var3.setStroke(Color.GREEN);
+         var2.getChildren().add(var3);
+      }
+   }
 
-    private void showMessage(String message) {
-        Text text = new Text(message);
-        text.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
-        text.setFill(Color.RED);
-        StackPane root = (StackPane) buttons[0][0].getParent().getParent();
-        root.getChildren().add(text);
-        StackPane.setAlignment(text, Pos.BOTTOM_CENTER);
-    }
+   public Line getWinningLine() {
+      int var1;
+      for(var1 = 0; var1 < 3; ++var1) {
+         if (this.game.board[var1][0] != ' ' && this.game.board[var1][0] == this.game.board[var1][1] && this.game.board[var1][1] == this.game.board[var1][2]) {
+            return new Line(50.0, ((double)var1 + 0.5) * 100.0, 250.0, ((double)var1 + 0.5) * 100.0);
+         }
+      }
 
-    private void showWinningLine(Line line) {
-        StackPane root = (StackPane) buttons[0][0].getParent().getParent();
-        Line lineShape = new Line(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
-        lineShape.setStrokeWidth(5);
-        lineShape.setStroke(Color.GREEN);
-        root.getChildren().add(lineShape);
-    }
+      for(var1 = 0; var1 < 3; ++var1) {
+         if (this.game.board[0][var1] != ' ' && this.game.board[0][var1] == this.game.board[1][var1] && this.game.board[1][var1] == this.game.board[2][var1]) {
+            return new Line(((double)var1 + 0.5) * 100.0, 50.0, ((double)var1 + 0.5) * 100.0, 250.0);
+         }
+      }
 
-    public Line getWinningLine() {
-        // Check rows
-        for (int i = 0; i < 3; i++) {
-            if (game.board[i][0] != ' ' && game.board[i][0] == game.board[i][1] && game.board[i][1] == game.board[i][2]) {
-                return new Line(50, (i + 0.5) * 100, 250, (i + 0.5) * 100);
-            }
-        }
-
-        // Check columns
-        for (int j = 0; j < 3; j++) {
-            if (game.board[0][j] != ' ' && game.board[0][j] == game.board[1][j] && game.board[1][j] == game.board[2][j]) {
-                return new Line((j + 0.5) * 100, 50, (j + 0.5) * 100, 250);
-            }
-        }
-
-        // Check diagonals
-        if (game.board[1][1] != ' ' && game.board[0][0] == game.board[1][1] && game.board[1][1] == game.board[2][2]) {
-            return new Line(50, 50, 250, 250);
-        }
-        if (game.board[1][1] != ' ' && game.board[0][2] == game.board[1][1] && game.board[1][1] == game.board[2][0]) {
-            return new Line(250, 50, 50, 250);
-        }
-
-        return null;
-    }
-
+      if (this.game.board[1][1] != ' ' && this.game.board[0][0] == this.game.board[1][1] && this.game.board[1][1] == this.game.board[2][2]) {
+         return new Line(50.0, 50.0, 250.0, 250.0);
+      } else if (this.game.board[1][1] != ' ' && this.game.board[0][2] == this.game.board[1][1] && this.game.board[1][1] == this.game.board[2][0]) {
+         return new Line(250.0, 50.0, 50.0, 250.0);
+      } else {
+         return null;
+      }
+   }
 }
