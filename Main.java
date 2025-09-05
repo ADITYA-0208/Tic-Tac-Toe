@@ -1,50 +1,52 @@
 import java.util.Scanner;
-import java.util.Random;
 
 public class Main {
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TicTacToe game = new TicTacToe();
-        AIPlayer ai = new AIPlayer();
+        char currentPlayer = 'X';
+
         System.out.println("Welcome to Tic-Tac-Toe!");
-        System.out.println("You are X, and the computer is O.");
-        System.out.println("Here is the starting board:");
-        game.displayBoard();
+        System.out.println("Player X and Player O take turns.");
+        displayBoard(game);
 
         while (!game.isGameOver()) {
-            // User's turn
-            System.out.println("Enter row and column (1-3):");
+            System.out.println("Player " + currentPlayer + ", enter row and column (1-3):");
             int row = scanner.nextInt() - 1;
             int col = scanner.nextInt() - 1;
-            while (game.board[row][col] != ' ') {
-                System.out.println("That square is already taken. Enter another row and column (1-3):");
+
+            while (row < 0 || row > 2 || col < 0 || col > 2 || game.board[row][col] != ' ') {
+                System.out.println("Invalid move! Enter row and column (1-3) again:");
                 row = scanner.nextInt() - 1;
                 col = scanner.nextInt() - 1;
             }
-            game.makeMove(row, col, 'X');
-            System.out.println("You played:");
-            game.displayBoard();
 
-            if (game.isGameOver()) {
-                break;
-            }
+            game.makeMove(row, col, currentPlayer);
+            System.out.println("Player " + currentPlayer + " played:");
+            displayBoard(game);
 
-            // Computer's turn
-            System.out.println("The computer is playing...");
-            ai.makeMove(game, 'O');
-            System.out.println("The computer played:");
-            game.displayBoard();
+            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
         }
 
-        char winner = game.getWinner();
-        if (winner == 'X') {
-            System.out.println("You win!");
-        } else if (winner == 'O') {
-            System.out.println("The computer wins!");
-        } else {
+        char winner = game.hasWon('X') ? 'X' : game.hasWon('O') ? 'O' : 'T';
+        if (winner == 'T') {
             System.out.println("It's a tie!");
+        } else {
+            System.out.println("Player " + winner + " wins!");
         }
+
+        scanner.close();
     }
 
+    private static void displayBoard(TicTacToe game) {
+        System.out.println("-------------");
+        for (int i = 0; i < 3; i++) {
+            System.out.print("| ");
+            for (int j = 0; j < 3; j++) {
+                System.out.print(game.board[i][j] + " | ");
+            }
+            System.out.println();
+            System.out.println("-------------");
+        }
+    }
 }
